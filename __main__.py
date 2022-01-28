@@ -5,6 +5,7 @@ from config import ftp_data_local, ftp_data_aa
 import pysftp
 import pathlib
 import os
+from datetime import datetime
 
 
 def categorise(row):
@@ -29,7 +30,8 @@ def main():
     df["mpn"] = df["sku"]
     df["status"] = df.apply(lambda row: categorise(row), axis=1)
     df = df[["sku", "mpn", "status", "quantity_availible"]]
-    df.to_csv("tmp/inventory.csv")
+    filename = f"tmp/Inventory_{datetime.today().strftime('%m%d%Y')}.csv"
+    df.to_csv(filename)
     print(df)
 
     cnopts = pysftp.CnOpts()
@@ -40,7 +42,7 @@ def main():
         password=ftp_data_aa["password"],
         cnopts=cnopts,
     )
-    file_path = rf"{pathlib.Path().resolve()}\tmp\inventory.csv"
+    file_path = rf"{pathlib.Path().resolve()}\{filename}"
     sftp.cwd("Inbound/")
     sftp.put(file_path)
     sftp.close()
