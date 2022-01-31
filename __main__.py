@@ -1,7 +1,7 @@
 import pandas as pd
 from io import StringIO
 from ftpretty import ftpretty
-from config import ftp_data_local, ftp_data_aa
+from config import ftp_data_local, ftp_data_aa, ftp_data_exa
 import pysftp
 import pathlib
 import os
@@ -30,21 +30,27 @@ def main():
     df["mpn"] = df["sku"]
     df["status"] = df.apply(lambda row: categorise(row), axis=1)
     df = df[["sku", "mpn", "status", "quantity_availible"]]
-    filename = f"tmp/Inventory_{datetime.today().strftime('%m%d%Y')}.csv"
-    df.to_csv(filename)
+    # filename = f"tmp/Inventory_{datetime.today().strftime('%m%d%Y')}.csv"
+    filename = f"tmp/Inventory_test.csv"
+
+    df.to_csv(filename, index=False)
     print(df)
 
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     sftp = pysftp.Connection(
-        host=ftp_data_aa["host"],
-        username=ftp_data_aa["username"],
-        password=ftp_data_aa["password"],
+        host=ftp_data_exa["host"],
+        username=ftp_data_exa["username"],
+        password=ftp_data_exa["password"],
         cnopts=cnopts,
     )
     file_path = rf"{pathlib.Path().resolve()}\{filename}"
-    sftp.cwd("Inbound/")
-    sftp.put(file_path)
+    # sftp.cwd("Inbound/")
+    sftp.cwd("AATest/")
+    try:
+        sftp.put(file_path)
+    except:
+        pass
     sftp.close()
     os.remove(file_path)
 
